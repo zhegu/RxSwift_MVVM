@@ -10,7 +10,7 @@ import UIKit
 import Alamofire
 import SwiftyJSON
 import MJRefresh
-
+import SDWebImage
 class HotViewController: BaseViewController,UITableViewDelegate,UITableViewDataSource {
     let myTableView:UITableView = UITableView(frame: CGRectMake(0, 0, Swift_SCR_W, Swift_SCR_H-NAVIGATION_HEIGHT - SEGMENT_HEIGHT * 2))
     var myImage:UIImage? = UIImage(named: "照片")
@@ -61,6 +61,7 @@ class HotViewController: BaseViewController,UITableViewDelegate,UITableViewDataS
     func httpGetRequset(type:LoadDataByType)->Void {
         var dic:[String:AnyObject]
         var refreshTicket:String = "0"
+        var urlLast:String
         if type == .loadNew {
             
             if modelArray.count == 0 {
@@ -70,7 +71,7 @@ class HotViewController: BaseViewController,UITableViewDelegate,UITableViewDataS
                 refreshTicket = (hot.ticket)!
             }
             
-            let urlLast = "\(urlAddress)&0&\(limit)&\(refreshTicket)"
+            urlLast = "\(urlAddress)&0&\(limit)&\(refreshTicket)"
             dic = ["type":0, "ticket":refreshTicket,"limit":limit]
         } else {
             if modelArray.count != 0 {
@@ -79,9 +80,9 @@ class HotViewController: BaseViewController,UITableViewDelegate,UITableViewDataS
             }
             
             dic = ["type":1, "ticket":refreshTicket,"limit":limit]
-//            let urlLast = "\(urlAddress)&1&\(limit)&\(refreshTicket)"
+            urlLast = "\(urlAddress)&1&\(limit)&\(refreshTicket)"
         }
-        Alamofire.request(.GET, url, parameters: dic).validate().responseString{ (response) -> Void in
+        Alamofire.request(.GET, urlLast, parameters: nil).validate().responseString{ (response) -> Void in
             
             if response.result.isSuccess == true {
                 if let result = response.result.value {
@@ -131,18 +132,16 @@ class HotViewController: BaseViewController,UITableViewDelegate,UITableViewDataS
         }
         let hot = modelArray[indexPath.row]
         myCell?.settingData(hot.ticket, image: nil)
-//        myCell?.viewImage?.sd_setImageWithURL(NSURL(string: hot.image_address!), placeholderImage: UIImage(named: "照片"), completed: { (imageDownload, httpError, SDImageCacheTypeMemory, httpUrl) -> Void in
-////            if httpError != nil {
-////                myCell?.viewImage?.image = imageDownload
-////            }
-//            print("\(indexPath.row): \(imageDownload)")
-//            if (self.myImage == nil) {
-//                self.myImage = UIImage(named: "照片")
-//            } else {
-//                myCell?.viewImage?.image = imageDownload
-//            }
-//
-//        })
+        myCell?.viewImage?.sd_setImageWithURL(NSURL(string: hot.image_address!), placeholderImage: UIImage(named: "照片"), completed: { (imageDownload, httpError, SDImageCacheTypeMemory, httpUrl) -> Void in
+            if httpError != nil {
+                print("\(indexPath.row): \(imageDownload)")
+                if (imageDownload == nil) {
+                    myCell?.viewImage?.image = self.myImage
+                } else {
+                    myCell?.viewImage?.image = imageDownload
+                }
+            }
+        })
         return  myCell!
     }
     

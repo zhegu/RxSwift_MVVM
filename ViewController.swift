@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RxSwift
 
 class ViewController: UIViewController {
 
@@ -31,6 +32,33 @@ class ViewController: UIViewController {
         print("login")
         let tarBar = TabBarViewControlelr();
         self.presentViewController(tarBar, animated: true, completion: nil)
+    }
+    
+    func example(description: String, action: () -> ()) {
+        print("\n--- \(description) example ---")
+        action()
+    }
+    
+    func delay(delay:Double, closure:()->()) {
+        dispatch_after(
+            dispatch_time(
+                DISPATCH_TIME_NOW,
+                Int64(delay * Double(NSEC_PER_SEC))
+            ),
+            dispatch_get_main_queue(), closure)
+    }
+    
+    func myExample()->Void {
+        
+//        let em : Observable<String> = empty()
+        
+        example("empty") {
+//            let emptySequence: Observable<Int> = empty()
+//            
+//            let subscription = emptySequence.subscribe { event in
+//                print(event)
+//            }
+        }
     }
 }
 
