@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Foundation
 import RxSwift
 
 class ViewController: UIViewController {
@@ -30,8 +31,9 @@ class ViewController: UIViewController {
 
     func login()->Void {
         print("login")
-        let tarBar = TabBarViewControlelr();
-        self.presentViewController(tarBar, animated: true, completion: nil)
+        myExample()
+//        let tarBar = TabBarViewControlelr();
+//        self.presentViewController(tarBar, animated: true, completion: nil)
     }
     
     func example(description: String, action: () -> ()) {
@@ -49,16 +51,51 @@ class ViewController: UIViewController {
     }
     
     func myExample()->Void {
-        
-//        let em : Observable<String> = empty()
-        
         example("empty") {
-//            let emptySequence: Observable<Int> = empty()
-//            
-//            let subscription = emptySequence.subscribe { event in
-//                print(event)
-//            }
+            let emptySequence: Observable<Int> = .empty()
+            
+            let subscription = emptySequence.subscribe { event in
+                print(event)
+            }
         }
+        
+        example("just") {
+            let singleElementSequence:Observable<Int>  = .just(32)
+            
+            let subscription = singleElementSequence
+                .subscribe { event in
+                    print(event)
+            }
+        }
+        
+        example("sequenceOf") { 
+            let sequenceOf:Observable<Int> = Observable<Int>.of(1,2,3)
+            
+            let subscription = sequenceOf.subscribe {event in
+                print(event)
+            }
+        }
+        
+        example("form") {
+//            let sequenceFromArray:Observable<Int>  = [1,2,3].asObservable()
+//            let form = [1,2,3,4] as Observable
+        }
+        let disposeBag = DisposeBag()
+        example("create") { 
+            let myCreate = { (singleElement:Int)->Observable<Int> in
+                return Observable<Int>.create({ (res) -> Disposable in
+                    res.onNext(singleElement)
+                    res.onCompleted()
+                    return NopDisposable.instance
+                })
+                
+            }
+            
+            let test = myCreate(5).subscribe({ (event) in
+                print(event)
+            })
+        }
+        
     }
 }
 
