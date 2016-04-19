@@ -51,14 +51,24 @@ class ViewController: UIViewController {
     }
     
     func myExample()->Void {
+        //empty 是一个空的序列，它只发送 .Completed 消息。
         example("empty") {
             let emptySequence: Observable<Int> = .empty()
             
-            let subscription = emptySequence.subscribe { event in
+            _ = emptySequence.subscribe { event in
                 print(event)
             }
         }
         
+        //never 是没有任何元素、也不会发送任何事件的空序列。
+        example("never") { 
+            let neverSequence:Observable<Int> = .never()
+            neverSequence.subscribe({ (event) in
+                print(event)
+            })
+        }
+        
+        //just 是只包含一个元素的序列，它会先发送 .Next(value) ，然后发送 .Completed 。
         example("just") {
             let singleElementSequence:Observable<Int>  = .just(32)
             
@@ -68,6 +78,10 @@ class ViewController: UIViewController {
             }
         }
         
+        example("justScheduler") { 
+//            let justScheduler:Observable<Int> = Observable<Int>.just(2, scheduler: ImmediateSchedulerType)
+        }
+        //sequenceOf 可以把一系列元素转换成事件序列
         example("sequenceOf") { 
             let sequenceOf:Observable<Int> = Observable<Int>.of(1,2,3)
             
@@ -85,6 +99,7 @@ class ViewController: UIViewController {
             let myCreate = { (singleElement:Int)->Observable<Int> in
                 return Observable<Int>.create({ (res) -> Disposable in
                     res.onNext(singleElement)
+                    res.onNext(singleElement + 2)
                     res.onCompleted()
                     return NopDisposable.instance
                 })
