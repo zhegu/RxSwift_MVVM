@@ -61,3 +61,4 @@ enum LoadDataByType {
     case loadNew
     case loadMore
 }
+
