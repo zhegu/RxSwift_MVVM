@@ -12,6 +12,9 @@ import RxSwift
 class LoginViewController: BaseViewController {
     
     let loginViewModel = LoginVM()
+    let textFieldAccount:UITextField = UITextField(frame: CGRectMake(100,100,150,30))
+    let textFieldPassword:UITextField = UITextField(frame: CGRectMake(100,140,150,30))
+    let btn = UIButton(frame: CGRect(x: 120, y: 180, width: 50, height: 40));
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view.backgroundColor = UIColor.whiteColor();
@@ -27,49 +30,82 @@ class LoginViewController: BaseViewController {
     }
     
     func initLoginUI()->Void {
-        let textFieldAccount:UITextField = UITextField(frame: CGRectMake(100,100,150,30))
+        
         textFieldAccount.placeholder = "请输入手机号"
         textFieldAccount.backgroundColor = UIColor.grayColor()
         view.addSubview(textFieldAccount)
 
-        let textFieldPassword:UITextField = UITextField(frame: CGRectMake(100,140,150,30))
+       
         textFieldPassword.secureTextEntry = true
         textFieldPassword.backgroundColor = UIColor.grayColor()
         view.addSubview(textFieldPassword)
         
-        let btn = UIButton(frame: CGRect(x: 120, y: 180, width: 50, height: 40));
+        
         btn.setTitle("login", forState: UIControlState.Normal);
+        btn.setTitleColor(UIColor.blackColor(), forState: .Normal)
         btn.backgroundColor = UIColor.redColor()
-//        btn.addTarget(self, action: #selector(LoginViewController.login), forControlEvents: UIControlEvents.TouchUpInside);
         self.view.addSubview(btn);
         
         
         let accountOb = textFieldAccount.rx_text.map { (text) -> Observable<LegalResult> in
             return self.loginViewModel.legalAccount(text)
-        }
+        }.switchLatest()
+        .shareReplay(1)
         
-        let passwordOb = textFieldPassword.rx_text.map { (text) -> Observable<LegalResult> in
-            return self.loginViewModel.legalPassord(text)
-        }
-        
-        let combine = Observable.combineLatest(textFieldAccount.rx_text, textFieldPassword.rx_text) { (account, password) in
+        accountOb.subscribe {[unowned self] (event) in
+            print("event:\(event)")
+            //textFieldAccount.backgroundColor = event.element?.valid! == true ? UIColor.greenColor():UIColor.grayColor()
+            self.refreshAccountUI((event.element?.valid!)!)
             
         }
         
+        let passwordOb = textFieldPassword.rx_text.map { [unowned self](text) -> Observable<LegalResult> in
+            return self.loginViewModel.legalPassord(text)
+        }.switchLatest()
+        .shareReplay(1)
         
-        btn.rx_controlEvent(.TouchUpInside).subscribeNext { (a) in
+        passwordOb.subscribe { [unowned self] (event) in
+            self.textFieldPassword.backgroundColor = event.element?.valid! == true ? UIColor.greenColor():UIColor.grayColor()
+        }
+        
+        let combine = Observable.combineLatest(accountOb, passwordOb) { (account, password) -> Bool in
+            //问题1： 在这个地方能对btn的属性进行设置， 但是是在这个地方还是在订阅的时候才进行设置（关于）
+//            btn.enabled = (account.valid! && password.valid!)
+//            
+//            return btn.enabled
+            return (account.valid! && password.valid!)
+            
+        }.subscribe { [unowned self](event) in
+            //所有对UI的操作 应该是放在订阅的方法里面去执行，而不是在组合的
+            
+            self.btn.enabled = (event.element)!
+        }
+//        RxSwift.Just<(Swift.Optional<Swift.Bool>, Swift.Optional<Swift.String>)>
+//        RxSwift.Just<(Swift.Optional<Swift.Bool>, Swift.Optional<Swift.String>)>
+
+        
+        btn.rx_controlEvent(.TouchUpInside).subscribeNext { [unowned self] (a) in
             print(a)
             self.login()
-            btn.enabled = false
+            
         }
     }
    
     
     func  login() -> Void {
         print("login")
+        let tabBarVC = TabBarViewControlelr()
+        self.presentViewController(tabBarVC, animated: true, completion: nil)
+//        self.navigationController?.pushViewController(tabBarVC, animated: true)
     }
     
-    
+    func refreshAccountUI(valid:Bool) -> Void {
+        if valid {
+            textFieldAccount.backgroundColor = UIColor.greenColor()
+        } else {
+            textFieldAccount.backgroundColor = UIColor.grayColor()
+        }
+    }
     
     
     

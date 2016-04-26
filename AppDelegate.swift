@@ -18,8 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         
         window = UIWindow(frame: UIScreen.mainScreen().bounds)
-        let mainVC = LoginViewController() //ViewController();
-        
+        let mainVC =  LoginViewController()//ViewController();
+        //LoginViewController()
         window?.rootViewController = mainVC;
         
         window?.makeKeyAndVisible();

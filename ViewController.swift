@@ -437,6 +437,26 @@ class ViewController: UIViewController {
         }
         
         //RxSwift中switchLatest相当与其他语言的switch方法
+        //switchLatest,将一个Observable<Observable<T>>转为为这样的Observable,它逐个发射数据的Observable
+        example("switchLatest") { 
+            let var1 = Variable(0)
+            let var3 = Variable(var1)
+//            let d = var3.switchLatest().subscribe { print($0) }
+        }
+        
+        //combineLatest 如果存在两条事件队列，需要同时监听，那么每当有新的事件发生的时候，combineLatest 会将每个队列的最新的一个元素进行合并。
+        example("combineLatest") { 
+            let intOb1 = PublishSubject<String>()
+            let intOb2 = PublishSubject<Int>()
+            
+            Observable.combineLatest(intOb1, intOb2, resultSelector: { (ob1, ob2) -> Bool in
+                print(ob1)
+                print(ob2)
+                return true
+            })
+        }
+        
     }
+    
 }
 
